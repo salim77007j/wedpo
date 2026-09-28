@@ -1,0 +1,61 @@
+name: windows-build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Qt 6.8.3 (MSVC 2022)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          arch: "win64_msvc2022_64"
+          cache: true
+
+      - name: Build Rust privacy core
+        working-directory: core
+        run: cargo build --release
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release `
+            -DRUST_CORE_DIR="${{ github.workspace }}/core/target"
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Deploy bundle
+        run: cmake --build build --target deploy
+
+      - name: Verify bundle
+        shell: pwsh
+        run: |
+          Get-ChildItem build/dist | Select-Object Name, Length
+          if (-not (Test-Path build/dist/wedpo-browser.exe)) { throw "binary missing" }
+          if (-not (Test-Path build/dist/wedpo_core.dll)) { throw "core dll missing" }
+          if (-not (Test-Path build/dist/Qt6WebEngineCore.dll)) { throw "webengine missing" }
+
+      - name: Package
+        shell: pwsh
+        run: |
+          Compress-Archive -Path build/dist/* -DestinationPath wedpo-windows-x64.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wedpo-windows-x64
+          path: wedpo-windows-x64.zip
+          retention-days: 30

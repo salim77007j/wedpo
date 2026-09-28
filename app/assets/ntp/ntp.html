@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New Tab</title>
+<style>
+  :root {
+    --bg: #f7f8fa; --surface: #ffffff; --text: #1f2430; --muted: #6b7280;
+    --border: #e7e9ee; --accent: #2563eb; --shadow: 0 8px 30px rgba(20,30,60,.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #191c22; --surface: #23262e; --text: #e6e8ee; --muted: #9aa1af;
+      --border: #32363f; --accent: #5b8cff; --shadow: 0 8px 30px rgba(0,0,0,.35);
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 34px 44px 0 44px;
+  }
+  .greet { display: flex; align-items: center; gap: 14px; }
+  .greet .mark {
+    width: 46px; height: 46px; border-radius: 14px; background: var(--surface);
+    box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 22px; color: var(--accent);
+  }
+  .greet h1 { font-size: 17px; font-weight: 700; }
+  .greet p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .meta { display: flex; align-items: center; gap: 26px; color: var(--muted); font-size: 13px; }
+  .meta .wx { display: flex; align-items: center; gap: 8px; }
+  .meta .wx b { color: var(--text); font-size: 15px; }
+  .meta .sep { width: 1px; height: 30px; background: var(--border); }
+  .meta .clockbox { text-align: right; }
+  .meta .clockbox b { font-size: 18px; color: var(--text); font-weight: 700; }
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 0 24px; }
+  h2.hero { font-size: 44px; font-weight: 800; letter-spacing: -0.5px; }
+  p.sub { color: var(--muted); font-size: 15px; margin-bottom: 26px; }
+  form.search {
+    width: min(640px, 92%); background: var(--surface); border-radius: 32px;
+    box-shadow: var(--shadow); display: flex; align-items: center;
+    padding: 8px 10px 8px 22px; border: 1px solid transparent; transition: border .15s;
+  }
+  form.search:focus-within { border-color: var(--accent); }
+  form.search svg { flex: none; }
+  form.search input {
+    flex: 1; border: none; outline: none; background: transparent; color: var(--text);
+    font-size: 16px; padding: 12px 12px;
+  }
+  form.search button {
+    border: none; background: var(--accent); color: #fff; border-radius: 24px;
+    padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .tiles { display: flex; gap: 34px; margin-top: 46px; flex-wrap: wrap; justify-content: center; }
+  .tile { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 96px;
+          cursor: pointer; border-radius: 12px; padding: 8px 0; }
+  .tile:hover { background: color-mix(in srgb, var(--surface) 55%, transparent); }
+  .tile .disc {
+    width: 62px; height: 62px; border-radius: 50%; background: var(--surface);
+    box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 700; color: #fff;
+  }
+  .tile.add .disc { color: var(--muted); background: var(--surface); font-size: 26px; }
+  .tile span { font-size: 13px; color: var(--text); }
+  .tile .x {
+    position: absolute; margin: -4px 0 0 58px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+    font-size: 11px; line-height: 18px; text-align: center; display: none;
+  }
+  .tile { position: relative; }
+  .tile:hover .x { display: block; }
+  footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 44px 22px 44px; color: var(--muted); font-size: 13px;
+  }
+  .foot-left { display: flex; align-items: center; gap: 14px; }
+  .foot-left .brand { display: flex; align-items: center; gap: 8px; }
+  .foot-left .divider { width: 1px; height: 14px; background: var(--border); }
+  .gear { cursor: pointer; display: flex; padding: 6px; border-radius: 8px; }
+  .gear:hover { background: var(--surface); }
+  .privacy-chip { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .privacy-chip:hover { color: var(--text); }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<header>
+  <div class="greet">
+    <div class="mark">W</div>
+    <div>
+      <h1 id="greeting">Good morning!</h1>
+      <p id="subgreeting">Hope you have a great day.</p>
+    </div>
+  </div>
+  <div class="meta">
+    <div class="wx" id="wx" title="Weather"></div>
+    <div class="sep"></div>
+    <div class="clockbox">
+      <b id="clock">--:--</b>
+      <div id="date"></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <h2 class="hero">Search the web</h2>
+  <p class="sub">Find what you need, when you need it.</p>
+  <form class="search" id="searchform" action="https://duckduckgo.com/" method="get">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
+    <input id="q" type="text" placeholder="Search the web privately or type a URL" autocomplete="off" autofocus>
+    <button type="submit">Search</button>
+  </form>
+  <div class="tiles" id="tiles"></div>
+</main>
+
+<footer>
+  <div class="foot-left">
+    <div class="brand">🌙&nbsp; A cleaner, brighter web</div>
+    <div class="divider"></div>
+    <div>Simple. Fast. Yours.</div>
+    <div class="divider"></div>
+    <div class="privacy-chip" id="chip" title="Open privacy dashboard">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
+      <span id="chipcount">0 trackers blocked today</span>
+    </div>
+  </div>
+  <div class="gear" id="gear" title="Settings">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/></svg>
+  </div>
+</footer>
+
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script>
+"use strict";
+const TILE_COLORS = ["#3b82f6","#8b5cf6","#ef4444","#0ea5e9","#f59e0b","#10b981","#ec4899","#64748b"];
+let bridge = null;
+
+function paintClock() {
+  const now = new Date();
+  const hh = now.getHours().toString().padStart(2, "0");
+  const mm = now.getMinutes().toString().padStart(2, "0");
+  document.getElementById("clock").textContent = `${hh}:${mm}`;
+  document.getElementById("date").textContent = now.toLocaleDateString(undefined,
+    { weekday: "short", year: "numeric", month: "short", day: "numeric" });
+}
+setInterval(paintClock, 1000); paintClock();
+
+function tileColorFor(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+  return TILE_COLORS[Math.abs(h) % TILE_COLORS.length];
+}
+
+function renderTiles(list) {
+  const host = document.getElementById("tiles");
+  host.innerHTML = "";
+  list.forEach((s, i) => {
+    const el = document.createElement("div");
+    el.className = "tile";
+    const letter = (s.title || "?").trim().charAt(0).toUpperCase();
+    el.innerHTML = `<div class="disc" style="background:${tileColorFor(s.url)}">${letter}</div>
+      <span>${(s.title || "").replace(/[<>&]/g, "")}</span><div class="x" title="Remove">✕</div>`;
+    el.addEventListener("click", () => bridge && bridge.openUrl(s.url));
+    el.querySelector(".x").addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      if (bridge && confirm(`Remove "${s.title}" from shortcuts?`)) bridge.removeShortcut(i);
+    });
+    host.appendChild(el);
+  });
+  const add = document.createElement("div");
+  add.className = "tile add";
+  add.innerHTML = `<div class="disc">+</div><span>Add shortcut</span>`;
+  add.addEventListener("click", () => {
+    if (!bridge) return;
+    const url = prompt("Shortcut URL (https://…)");
+    if (!url) return;
+    const title = prompt("Shortcut name") || new URL(url).hostname;
+    bridge.addShortcut(title, url);
+  });
+  host.appendChild(add);
+}
+
+function renderWeather(w) {
+  const el = document.getElementById("wx");
+  if (!w || w.ok !== true) {
+    el.innerHTML = `<span style="cursor:pointer" id="wxenable" title="Set your city in Settings">⚙︎ Enable weather</span>`;
+    const btn = document.getElementById("wxenable");
+    if (btn) btn.addEventListener("click", () => bridge && bridge.openSettings());
+    return;
+  }
+  const emoji = {0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",48:"🌫️",51:"🌦️",53:"🌦️",55:"🌦️",
+                 61:"🌧️",63:"🌧️",65:"🌧️",66:"🌧️",67:"🌧️",71:"🌨️",73:"🌨️",75:"🌨️",
+                 77:"🌨️",80:"🌦️",81:"🌦️",82:"🌧️",85:"🌨️",86:"🌨️",95:"⛈️",96:"⛈️",99:"⛈️"};
+  el.innerHTML = `<span style="font-size:20px">${emoji[w.code] || "🌤️"}</span>
+    <span><b>${Math.round(w.temp)}°C</b> · ${w.city || ""}</span>`;
+}
+
+function renderStats(s) {
+  document.getElementById("chipcount").textContent =
+    `${Number(s.today || 0).toLocaleString()} trackers blocked today`;
+}
+
+function refresh() {
+  if (!bridge) return;
+  document.getElementById("greeting").textContent = bridge.greeting();
+  renderTiles(bridge.shortcuts().map(v => ({ title: v.title, url: v.url })));
+  renderWeather(bridge.weather());
+  renderStats(bridge.stats());
+}
+
+document.getElementById("searchform").addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  const q = document.getElementById("q").value.trim();
+  if (!q) return;
+  if (bridge) { bridge.search(q); }
+  else { location.href = "https://duckduckgo.com/?q=" + encodeURIComponent(q); }
+  document.getElementById("q").value = "";
+});
+
+document.getElementById("chip").addEventListener("click", () => bridge && bridge.openSettings());
+document.getElementById("gear").addEventListener("click", () => bridge && bridge.openSettings());
+document.getElementById("q").addEventListener("keydown", (ev) => { ev.stopPropagation(); });
+
+function boot() {
+  if (typeof QWebChannel !== "undefined" && typeof qt !== "undefined") {
+    new QWebChannel(qt.webChannelTransport, (ch) => {
+      bridge = ch.objects.wedpo;
+      bridge.shortcutsChanged.connect(refresh);
+      bridge.weatherChanged.connect(() => renderWeather(bridge.weather()));
+      bridge.requestWeather();
+      refresh();
+    });
+  } else {
+    setTimeout(boot, 80);
+  }
+}
+boot();
+setTimeout(refresh, 800);   // fallback refresh once the bridge settles
+</script>
+</body>
+</html>

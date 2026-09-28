@@ -1,0 +1,46 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="icons/alert.svg">icons/alert.svg</file>
+        <file alias="icons/back.svg">icons/back.svg</file>
+        <file alias="icons/check.svg">icons/check.svg</file>
+        <file alias="icons/chevron-down.svg">icons/chevron-down.svg</file>
+        <file alias="icons/chevron-up.svg">icons/chevron-up.svg</file>
+        <file alias="icons/clock.svg">icons/clock.svg</file>
+        <file alias="icons/close.svg">icons/close.svg</file>
+        <file alias="icons/devtools.svg">icons/devtools.svg</file>
+        <file alias="icons/download.svg">icons/download.svg</file>
+        <file alias="icons/external.svg">icons/external.svg</file>
+        <file alias="icons/folder.svg">icons/folder.svg</file>
+        <file alias="icons/forward.svg">icons/forward.svg</file>
+        <file alias="icons/globe.svg">icons/globe.svg</file>
+        <file alias="icons/history.svg">icons/history.svg</file>
+        <file alias="icons/home.svg">icons/home.svg</file>
+        <file alias="icons/incognito.svg">icons/incognito.svg</file>
+        <file alias="icons/info.svg">icons/info.svg</file>
+        <file alias="icons/lock.svg">icons/lock.svg</file>
+        <file alias="icons/maximize.svg">icons/maximize.svg</file>
+        <file alias="icons/menu.svg">icons/menu.svg</file>
+        <file alias="icons/minimize.svg">icons/minimize.svg</file>
+        <file alias="icons/minus.svg">icons/minus.svg</file>
+        <file alias="icons/mute.svg">icons/mute.svg</file>
+        <file alias="icons/newtab.svg">icons/newtab.svg</file>
+        <file alias="icons/plus.svg">icons/plus.svg</file>
+        <file alias="icons/print.svg">icons/print.svg</file>
+        <file alias="icons/reload.svg">icons/reload.svg</file>
+        <file alias="icons/restore.svg">icons/restore.svg</file>
+        <file alias="icons/save.svg">icons/save.svg</file>
+        <file alias="icons/search.svg">icons/search.svg</file>
+        <file alias="icons/settings.svg">icons/settings.svg</file>
+        <file alias="icons/shield-check.svg">icons/shield-check.svg</file>
+        <file alias="icons/shield.svg">icons/shield.svg</file>
+        <file alias="icons/sound.svg">icons/sound.svg</file>
+        <file alias="icons/star-filled.svg">icons/star-filled.svg</file>
+        <file alias="icons/star.svg">icons/star.svg</file>
+        <file alias="icons/trash.svg">icons/trash.svg</file>
+        <file alias="icons/unlock.svg">icons/unlock.svg</file>
+        <file alias="icons/zoom-in.svg">icons/zoom-in.svg</file>
+        <file alias="icons/zoom-out.svg">icons/zoom-out.svg</file>
+        <file alias="ntp/ntp.html">ntp/ntp.html</file>
+        <file alias="inject/fp.js">inject/fp.js</file>
+    </qresource>
+</RCC>
