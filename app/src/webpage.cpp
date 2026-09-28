@@ -47,8 +47,10 @@ static QString jsStringLiteral(const QString &s)
 WebPage::WebPage(QWebEngineProfile *profile, QObject *parent)
     : QWebEnginePage(profile, parent)
 {
-    connect(this, &QWebEnginePage::featurePermissionRequested,
-            this, &WebPage::onFeaturePermissionRequested);
+    connect(this, &QWebEnginePage::permissionRequested,
+            this, &WebPage::onPermissionRequested);
+    connect(this, &QWebEnginePage::certificateError,
+            this, &WebPage::onCertificateError);
     connect(this, &QWebEnginePage::urlChanged, this, [this](const QUrl &url) {
         if (m_pendingPopup && url.isValid() && !url.isEmpty()) {
             const QUrl u = url;
@@ -77,27 +79,28 @@ WebPage::WebPage(QWebEngineProfile *profile, QObject *parent)
     ensureFingerprintScript();
 }
 
-QString WebPage::featureKey(QWebEnginePage::Feature f)
+QString WebPage::permissionKey(QWebEnginePermission::PermissionType type)
 {
-    switch (f) {
-    case QWebEnginePage::Geolocation:              return QStringLiteral("geolocation");
-    case QWebEnginePage::MediaAudioCapture:        return QStringLiteral("microphone");
-    case QWebEnginePage::MediaVideoCapture:        return QStringLiteral("camera");
-    case QWebEnginePage::MediaAudioVideoCapture:   return QStringLiteral("camera");
-    case QWebEnginePage::DesktopVideoCapture:      return QStringLiteral("screen");
-    case QWebEnginePage::DesktopAudioVideoCapture: return QStringLiteral("screen");
-    case QWebEnginePage::Notifications:            return QStringLiteral("notifications");
-    case QWebEnginePage::ClipboardReadWrite:       return QStringLiteral("clipboard");
-    case QWebEnginePage::MouseLock:                return QStringLiteral("mouse");
-    case QWebEnginePage::LocalFontsAccess:         return QStringLiteral("fonts");
-    default:                                       return QStringLiteral("other");
+    switch (type) {
+    case QWebEnginePermission::PermissionType::Geolocation:               return QStringLiteral("geolocation");
+    case QWebEnginePermission::PermissionType::MediaAudioCapture:        return QStringLiteral("microphone");
+    case QWebEnginePermission::PermissionType::MediaVideoCapture:        return QStringLiteral("camera");
+    case QWebEnginePermission::PermissionType::MediaAudioVideoCapture:   return QStringLiteral("camera");
+    case QWebEnginePermission::PermissionType::DesktopVideoCapture:      return QStringLiteral("screen");
+    case QWebEnginePermission::PermissionType::DesktopAudioVideoCapture: return QStringLiteral("screen");
+    case QWebEnginePermission::PermissionType::Notifications:            return QStringLiteral("notifications");
+    case QWebEnginePermission::PermissionType::ClipboardReadWrite:       return QStringLiteral("clipboard");
+    case QWebEnginePermission::PermissionType::MouseLock:                return QStringLiteral("mouse");
+    case QWebEnginePermission::PermissionType::LocalFontsAccess:         return QStringLiteral("fonts");
+    default:                                                             return QStringLiteral("other");
     }
 }
 
 // ---- permissions -------------------------------------------------------------
-void WebPage::onFeaturePermissionRequested(const QUrl &origin, QWebEnginePage::Feature feature)
+void WebPage::onPermissionRequested(QWebEnginePermission request)
 {
-    const QString key = featureKey(feature);
+    const QUrl origin = request.origin();
+    const QString key = permissionKey(request.permissionType());
     int decision = Settings::instance()->permission(origin.toString(), key);
     if (decision == 0) {
         QMessageBox box(this->view());
@@ -114,15 +117,16 @@ void WebPage::onFeaturePermissionRequested(const QUrl &origin, QWebEnginePage::F
         if (remember->isChecked())
             Settings::instance()->setPermission(origin.toString(), key, decision);
     }
-    setFeaturePermission(origin, feature,
-                         decision == 1 ? QWebEnginePage::PermissionGrantedByUser
-                                       : QWebEnginePage::PermissionDeniedByUser);
+    if (decision == 1)
+        request.grant();
+    else
+        request.deny();
 }
 
 // ---- certificates --------------------------------------------------------------
-bool WebPage::certificateError(const QWebEngineCertificateError &error)
+void WebPage::onCertificateError(const QWebEngineCertificateError &error)
 {
-    QWebEngineCertificateError ce = error;
+    QWebEngineCertificateError ce = error;   // the signal object is a copy we own
     if (!ce.isOverridable())
         return false;   // reject hard errors outright
 
@@ -132,6 +136,10 @@ bool WebPage::certificateError(const QWebEngineCertificateError &error)
     if (Settings::instance()->value(QStringLiteral("certOverride/%1").arg(host), false).toBool()) {
         ce.acceptCertificate();
         return true;
+    }
+    if (!ce.isOverridable()) {
+        ce.rejectCertificate();
+        return;
     }
     ce.defer();
     QMessageBox box(this->view());
@@ -148,10 +156,9 @@ bool WebPage::certificateError(const QWebEngineCertificateError &error)
         if (remember->isChecked())
             Settings::instance()->setValue(QStringLiteral("certOverride/%1").arg(host), true);
         ce.acceptCertificate();
-        return true;
+        return;
     }
     ce.rejectCertificate();
-    return true;
 }
 
 // ---- navigation ------------------------------------------------------------------

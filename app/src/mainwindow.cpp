@@ -21,6 +21,7 @@
 #include <QWebEngineFullScreenRequest>
 #include <QWebEngineUrlSchemeHandler>
 #include <QWebEngineUrlRequestJob>
+#include <QWebEngineCookieStore>
 #include <QWebChannel>
 #include <QWebEngineScript>
 #include <QJsonDocument>
@@ -126,13 +127,12 @@ void MainWindow::setupProfile()
         m_profile->setPersistentCookiesPolicy(QWebEngineProfile::AllowPersistentCookies);
         break;
     }
-#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     if (Settings::instance()->cookieMode() == 1) {
-        m_profile->setCookieFilter([](const QWebEngineCookieFilterRequest &req) {
-            return !req.thirdParty;      // block third-party cookies
-        });
+        m_profile->cookieStore()->setCookieFilter(
+            [](const QWebEngineCookieStore::FilterRequest &req) {
+                return !req.thirdParty;      // block third-party cookies
+            });
     }
-#endif
 
     connect(m_profile, &QWebEngineProfile::downloadRequested, this, [this](QWebEngineDownloadRequest *req) {
         if (Settings::instance()->askWhereToSave()) {
@@ -402,7 +402,6 @@ void MainWindow::installPageHooks(WebView *view)
 {
     WebPage *page = view->webPage();
     view->page()->setWebChannel(m_channel);
-    page->settings()->setAttribute(QWebEngineSettings::FullSupportsViewportMeta, true);
 
     connect(page, &WebPage::createTabRequested, this,
             [this](const QUrl &url, bool background, bool) { newTab(url, background, !background); });
@@ -451,7 +450,7 @@ void MainWindow::installPageHooks(WebView *view)
             m_toolbar->setBookmarked(Stores::instance()->isBookmarked(view->url().toString()));
         }
     });
-    connect(page, &QWebEnginePage::recentAudibleChanged, this, [this, view](bool audible) {
+    connect(page, &QWebEnginePage::recentlyAudibleChanged, this, [this, view](bool audible) {
         for (Tab &t : m_tabs)
             if (t.view == view)
                 t.audible = audible;
@@ -845,10 +844,7 @@ void MainWindow::printPage()
     dlg.setWindowTitle(tr("Print page"));
     if (dlg.exec() != QDialog::Accepted)
         return;
-    t->view->page()->print(&printer, [this](bool ok) {
-        if (!ok)
-            QMessageBox::warning(this, tr("Print"), tr("Printing failed."));
-    });
+    t->view->print(&printer);
 }
 
 void MainWindow::savePage()
@@ -863,7 +859,7 @@ void MainWindow::savePage()
     if (path.isEmpty())
         return;
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
-    t->view->page()->save(path, QWebEngineDownloadRequest::MimeHtmlSavePageFormat);
+    t->view->page()->save(path, QWebEngineDownloadRequest::MimeHtmlSaveFormat);
 #else
     QMessageBox::information(this, tr("Save page"), tr("Save page requires Qt 6.8 or newer."));
 #endif

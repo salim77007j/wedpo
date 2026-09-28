@@ -69,40 +69,35 @@ void WebView::wheelEvent(QWheelEvent *event)
 void WebView::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu menu(this);
-    const QWebEnginePage *pg = page();
-    const QAction *back = pageAction(QWebEnginePage::Back);
-    const QAction *fwd = pageAction(QWebEnginePage::Forward);
-    if (back->isEnabled()) menu.addAction(back);
-    if (fwd->isEnabled()) menu.addAction(fwd);
+    if (pageAction(QWebEnginePage::Back)->isEnabled())
+        menu.addAction(pageAction(QWebEnginePage::Back));
+    if (pageAction(QWebEnginePage::Forward)->isEnabled())
+        menu.addAction(pageAction(QWebEnginePage::Forward));
     menu.addAction(pageAction(QWebEnginePage::Reload));
     menu.addAction(pageAction(QWebEnginePage::Stop));
     menu.addSeparator();
-    const QUrl hitTestUrl = pg->contextMenuData() ? pg->contextMenuData()->linkUrl() : QUrl();
-    const QUrl mediaUrl = pg->contextMenuData() ? pg->contextMenuData()->mediaUrl() : QUrl();
-    if (!hitTestUrl.isEmpty()) {
-        menu.addAction(pageAction(QWebEnginePage::OpenLinkInNewTab));
-        menu.addAction(pageAction(QWebEnginePage::OpenLinkInNewWindow));
-        menu.addAction(pageAction(QWebEnginePage::CopyLinkToClipboard));
-        menu.addAction(pageAction(QWebEnginePage::DownloadLinkToDisk));
-        menu.addSeparator();
-    }
-    if (!mediaUrl.isEmpty()) {
-        menu.addAction(pageAction(QWebEnginePage::CopyImageToClipboard));
-        menu.addAction(pageAction(QWebEnginePage::CopyImageUrlToClipboard));
-        menu.addAction(pageAction(QWebEnginePage::DownloadImageToDisk));
-        menu.addSeparator();
-    }
+    // link/image actions are auto-enabled by the engine when a target is under the cursor
+    menu.addAction(pageAction(QWebEnginePage::OpenLinkInNewTab));
+    menu.addAction(pageAction(QWebEnginePage::OpenLinkInNewWindow));
+    menu.addAction(pageAction(QWebEnginePage::CopyLinkToClipboard));
+    menu.addAction(pageAction(QWebEnginePage::DownloadLinkToDisk));
+    menu.addSeparator();
+    menu.addAction(pageAction(QWebEnginePage::CopyImageToClipboard));
+    menu.addAction(pageAction(QWebEnginePage::CopyImageUrlToClipboard));
+    menu.addAction(pageAction(QWebEnginePage::DownloadImageToDisk));
+    menu.addSeparator();
     menu.addAction(pageAction(QWebEnginePage::Copy));
     menu.addAction(pageAction(QWebEnginePage::Paste));
     menu.addAction(pageAction(QWebEnginePage::SelectAll));
     menu.addSeparator();
-    menu.addAction(tr("Save page as…"), this, [this]() {
-        emit pageRequestedSave();
-    }, QKeySequence::Save);
-    menu.addAction(tr("Print…"), this, [this]() { emit pageRequestedPrint(); }, QKeySequence::Print);
+    QAction *saveAct = menu.addAction(tr("Save page as…"), this, &WebView::pageRequestedSave);
+    saveAct->setShortcut(QKeySequence::Save);
+    QAction *printAct = menu.addAction(tr("Print…"), this, &WebView::pageRequestedPrint);
+    printAct->setShortcut(QKeySequence::Print);
     menu.addSeparator();
-    menu.addAction(tr("Inspect element"), this, [this]() {
+    QAction *insp = menu.addAction(tr("Inspect element"), this, [this]() {
         triggerPageAction(QWebEnginePage::InspectElement);
-    }, QKeySequence("F12"));
+    });
+    insp->setShortcut(QKeySequence("F12"));
     menu.exec(event->globalPos());
 }

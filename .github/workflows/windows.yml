@@ -24,6 +24,7 @@ jobs:
           version: "6.8.3"
           arch: "win64_msvc2022_64"
           cache: true
+          modules: qtwebengine qtwebchannel qtwebsockets qtwebview
 
       - name: Build Rust privacy core
         working-directory: core

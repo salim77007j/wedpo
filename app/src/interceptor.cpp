@@ -10,7 +10,6 @@
 RequestInterceptor::RequestInterceptor(QObject *parent)
     : QWebEngineUrlRequestInterceptor(parent)
 {
-    setInterceptionStrategy(QWebEngineUrlRequestInterceptor::InterceptorOnCall);
 }
 
 static QString resourceTypeName(QWebEngineUrlRequestInfo::ResourceType t)
@@ -23,11 +22,9 @@ static QString resourceTypeName(QWebEngineUrlRequestInfo::ResourceType t)
     case R::ResourceTypeScript:         return QStringLiteral("script");
     case R::ResourceTypeImage:          return QStringLiteral("image");
     case R::ResourceTypeXhr:            return QStringLiteral("xmlhttprequest");
-    case R::ResourceTypeFetch:          return QStringLiteral("fetch");
     case R::ResourceTypePing:           return QStringLiteral("ping");
     case R::ResourceTypeMedia:          return QStringLiteral("media");
-    case R::ResourceTypeFont:           return QStringLiteral("font");
-    case R::ResourceTypeWebSocket:      return QStringLiteral("websocket");
+    case R::ResourceTypeFontResource:   return QStringLiteral("font");
     default:                            return QStringLiteral("other");
     }
 }
