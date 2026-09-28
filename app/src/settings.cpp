@@ -32,11 +32,11 @@ void Settings::loadCaches()
 {
     QSettings st(kOrg, kApp);
     m_zoom.clear();
-    const QJsonObject zo = QJsonDocument::fromJson(st.value("pageZooms").toByteArray().toUtf8()).object();
+    const QJsonObject zo = QJsonDocument::fromJson(st.value("pageZooms").toByteArray()).object();
     for (auto it = zo.begin(); it != zo.end(); ++it)
         m_zoom.insert(it.key(), it.value().toDouble(1.0));
     m_perms.clear();
-    const QJsonObject po = QJsonDocument::fromJson(st.value("permissions").toByteArray().toUtf8()).object();
+    const QJsonObject po = QJsonDocument::fromJson(st.value("permissions").toByteArray()).object();
     for (auto fit = po.begin(); fit != po.end(); ++fit) {
         QHash<QString, int> m;
         const QJsonObject fo = fit.value().toObject();

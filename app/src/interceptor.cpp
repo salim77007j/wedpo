@@ -18,7 +18,7 @@ static QString resourceTypeName(QWebEngineUrlRequestInfo::ResourceType t)
     switch (t) {
     case R::ResourceTypeMainFrame:      return QStringLiteral("document");
     case R::ResourceTypeSubFrame:       return QStringLiteral("sub_frame");
-    case R::ResourceTypeStyleSheet:     return QStringLiteral("stylesheet");
+    case R::ResourceTypeStylesheet:     return QStringLiteral("stylesheet");
     case R::ResourceTypeScript:         return QStringLiteral("script");
     case R::ResourceTypeImage:          return QStringLiteral("image");
     case R::ResourceTypeXhr:            return QStringLiteral("xmlhttprequest");

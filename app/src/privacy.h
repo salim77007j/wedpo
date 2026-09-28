@@ -7,7 +7,7 @@
 #include <QStringList>
 #include <QMutex>
 
-struct WedpoEngine;
+struct wedpo_engine;
 
 class Privacy : public QObject
 {
@@ -65,10 +65,10 @@ private:
     ~Privacy() override;
     static void loadListsIntoEngine();       // called on worker thread context
     static QString listPath(const QString &id);
-    static void saveStats();
-    static void loadStats();
+    void saveStats();
+    void loadStats();
 
-    WedpoEngine *m_engine = nullptr;
+    wedpo_engine *m_engine = nullptr;
     mutable QMutex m_engineMutex;   // engine calls must be serialized
     QString m_currentHost;
     mutable QMutex m_statsMutex;

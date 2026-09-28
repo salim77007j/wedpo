@@ -69,7 +69,7 @@ public:
     void setRestoreOnCrash(bool v);
 
     // generic access for pages
-    QVariant value(const QString &key, const QVariant &def = {}) const;
+    QVariant value(const QString &key, const QVariant &def = QVariant()) const;
     void setValue(const QString &key, const QVariant &v);
 
     // per-host page zoom
