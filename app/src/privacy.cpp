@@ -9,7 +9,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QNetworkRequest>
 #include <QDateTime>
 #include <QSettings>
 #include <QCryptographicHash>
@@ -127,7 +126,7 @@ void Privacy::updateList(const QString &id)
     if (url.isEmpty()) {
         // custom list — url stored in settings
         QSettings st("Wedpo", "Wedpo");
-        const QJsonObject o = QJsonDocument::fromJson(st.value("privacy/customLists").toByteArray().toUtf8()).object();
+        const QJsonObject o = QJsonDocument::fromJson(st.value("privacy/customLists").toByteArray()).object();
         url = o.value(id).toObject().value("url").toString();
     }
     if (url.isEmpty())
@@ -172,7 +171,7 @@ void Privacy::addCustomList(const QString &name, const QString &url)
         lists << id;
     Settings::instance()->setFilterLists(lists);
     QSettings st("Wedpo", "Wedpo");
-    QJsonObject o = QJsonDocument::fromJson(st.value("privacy/customLists").toByteArray().toUtf8()).object();
+    QJsonObject o = QJsonDocument::fromJson(st.value("privacy/customLists").toByteArray()).object();
     o.insert(id, QJsonObject{{QStringLiteral("name"), name}, {QStringLiteral("url"), url}});
     st.setValue("privacy/customLists", QJsonDocument(o).toJson(QJsonDocument::Compact));
     updateList(id);
@@ -187,7 +186,7 @@ void Privacy::removeCustomList(const QString &id)
     Settings::instance()->setFilterLists(lists);
     QFile::remove(listPath(id));
     QSettings st("Wedpo", "Wedpo");
-    QJsonObject o = QJsonDocument::fromJson(st.value("privacy/customLists").toByteArray().toUtf8()).object();
+    QJsonObject o = QJsonDocument::fromJson(st.value("privacy/customLists").toByteArray()).object();
     o.remove(id);
     st.setValue("privacy/customLists", QJsonDocument(o).toJson(QJsonDocument::Compact));
     reloadLists();
@@ -208,7 +207,7 @@ void Privacy::importCustomText(const QString &name, const QString &text)
         lists << id;
     Settings::instance()->setFilterLists(lists);
     QSettings st("Wedpo", "Wedpo");
-    QJsonObject o = QJsonDocument::fromJson(st.value("privacy/customLists").toByteArray().toUtf8()).object();
+    QJsonObject o = QJsonDocument::fromJson(st.value("privacy/customLists").toByteArray()).object();
     o.insert(id, QJsonObject{{QStringLiteral("name"), name}, {QStringLiteral("url"), QString()}});
     st.setValue("privacy/customLists", QJsonDocument(o).toJson(QJsonDocument::Compact));
     reloadLists();
@@ -228,7 +227,7 @@ int Privacy::check(const QString &url, const QString &resourceType,
     const int r = wedpo_engine_check(m_engine, url.toUtf8().constData(),
                                      resourceType.toUtf8().constData(),
                                      firstPartyHost.toUtf8().constData(),
-                                     redirect, sizeof(redirect));
+                                     redirect, int(sizeof(redirect)));
     if (r == 2 && redirectOut)
         *redirectOut = QString::fromUtf8(redirect);
     return r;
@@ -242,7 +241,7 @@ QString Privacy::cosmeticCss(const QString &url) const
         return QString();
     QMutexLocker lock(&m_engineMutex);
     static thread_local char buf[262144];
-    const int n = wedpo_engine_cosmetic(m_engine, url.toUtf8().constData(), buf, sizeof(buf));
+    const int n = wedpo_engine_cosmetic(m_engine, url.toUtf8().constData(), buf, int(sizeof(buf)));
     return n > 0 ? QString::fromUtf8(buf) : QString();
 }
 
@@ -254,7 +253,7 @@ QString Privacy::genericCss(const QStringList &classes, const QStringList &ids, 
     static thread_local char buf[262144];
     const QString c = classes.join(QLatin1Char('\n')), i = ids.join(QLatin1Char('\n')), e = exceptions.join(QLatin1Char('\n'));
     const int n = wedpo_engine_generic_css(m_engine, c.toUtf8().constData(), i.toUtf8().constData(),
-                                           e.toUtf8().constData(), buf, sizeof(buf));
+                                           e.toUtf8().constData(), buf, int(sizeof(buf)));
     return n > 0 ? QString::fromUtf8(buf) : QString();
 }
 
@@ -264,7 +263,7 @@ QString Privacy::stripTracking(const QString &url) const
         return url;
     QMutexLocker lock(&m_engineMutex);
     static thread_local char buf[2048];
-    const int n = wedpo_engine_strip_tracking(m_engine, url.toUtf8().constData(), buf, sizeof(buf));
+    const int n = wedpo_engine_strip_tracking(m_engine, url.toUtf8().constData(), buf, int(sizeof(buf)));
     return n >= 0 ? QString::fromUtf8(buf) : url;
 }
 
@@ -273,7 +272,7 @@ int Privacy::downloadRisk(const QString &url, const QString &mime, QStringList *
     QMutexLocker lock(&m_engineMutex);
     static thread_local char buf[4096];
     const int score = wedpo_engine_risk(m_engine, url.toUtf8().constData(),
-                                        mime.toUtf8().constData(), buf, sizeof(buf));
+                                        mime.toUtf8().constData(), buf, int(sizeof(buf)));
     if (reasons) {
         reasons->clear();
         const QJsonDocument doc = QJsonDocument::fromJson(QString::fromUtf8(buf).toUtf8());
@@ -287,7 +286,7 @@ QString Privacy::listsInfo() const
 {
     QMutexLocker lock(&m_engineMutex);
     static thread_local char buf[65536];
-    const int n = wedpo_engine_lists_info(m_engine, buf, sizeof(buf));
+    const int n = wedpo_engine_lists_info(m_engine, buf, int(sizeof(buf)));
     return n > 0 ? QString::fromUtf8(buf) : QStringLiteral("{\"lists\":[],\"count\":0}");
 }
 
@@ -312,7 +311,6 @@ void Privacy::resetStats()
         m_typeCounts.clear();
         m_total = 0;
         m_today = 0;
-    }
     }
     saveStats();
     emit statsChanged();
@@ -350,10 +348,10 @@ void Privacy::loadStats()
     const QString today = QDate::currentDate().toString(Qt::ISODate);
     if (m_statsDay != today)
         m_today = 0;
-    const QJsonObject hosts = QJsonDocument::fromJson(st.value("stats/hosts").toByteArray().toUtf8()).object();
+    const QJsonObject hosts = QJsonDocument::fromJson(st.value("stats/hosts").toByteArray()).object();
     for (auto it = hosts.begin(); it != hosts.end(); ++it)
         m_hostCounts.insert(it.key(), qint64(it.value().toDouble()));
-    const QJsonObject types = QJsonDocument::fromJson(st.value("stats/types").toByteArray().toUtf8()).object();
+    const QJsonObject types = QJsonDocument::fromJson(st.value("stats/types").toByteArray()).object();
     for (auto it = types.begin(); it != types.end(); ++it)
         m_typeCounts.insert(it.key(), qint64(it.value().toDouble()));
 }
