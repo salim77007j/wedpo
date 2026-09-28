@@ -24,7 +24,7 @@ jobs:
             libxcb-randr0-dev libxcb-render-util0-dev libxcb-shape0-dev \
             libxcb-shm0-dev libxcb-sync-dev libxcb-xfixes0-dev \
             libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev \
-            libxkbcommon-x11-0-dev libxcomposite-dev libxdamage-dev \
+            libxkbcommon-x11-dev libxcomposite-dev libxdamage-dev \
             libxrandr-dev libxtst-dev libdrm-dev libgbm-dev \
             libasound2-dev libpulse-dev libnss3-dev libxss-dev \
             libatspi2.0-dev libegl1-mesa-dev
