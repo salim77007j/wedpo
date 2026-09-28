@@ -3,3 +3,5 @@ build/
 dist/
 *.user
 .DS_Store
+build_local.bat
+build_log.txt
