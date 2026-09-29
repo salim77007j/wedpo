@@ -40,7 +40,7 @@ QString NtpBridge::tagline() const
 QJsonArray NtpBridge::shortcuts() const
 {
     const QJsonDocument doc = QJsonDocument::fromJson(
-        Settings::instance()->value("ntp/shortcuts", QByteArray()).toByteArray().toUtf8());
+        Settings::instance()->value("ntp/shortcuts", QByteArray()).toByteArray());
     if (doc.isArray())
         return doc.array();
     // defaults shown in the design, editable by the user

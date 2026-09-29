@@ -67,10 +67,7 @@ int main(int argc, char *argv[])
             QMessageBox box;
             box.setWindowTitle(QObject::tr("Wedpo didn't shut down correctly"));
             box.setIcon(QMessageBox::Question);
-            box.setText(QObject::tr("Wedpo was not closed properly last time.
-"
-
-                                    "Restore your previous session?"));
+            box.setText(QObject::tr("Wedpo was not closed properly last time.\nRestore your previous session?"));
             QPushButton *restoreBtn = box.addButton(QObject::tr("Restore session"),
                                                     QMessageBox::YesRole);
             box.addButton(QObject::tr("Start fresh"), QMessageBox::NoRole);

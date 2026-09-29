@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QtMath>
 #include <algorithm>
+#include <cmath>
 
 static constexpr int kStripHeight = 38;
 static constexpr int kPinnedWidth = 44;
@@ -26,7 +27,7 @@ TabStrip::TabStrip(QWidget *parent)
     setFixedHeight(kStripHeight);
     setMouseTracking(true);
     connect(&m_spinnerTimer, &QTimer::timeout, this, [this]() {
-        m_spinnerAngle = qNormalizeAngle(m_spinnerAngle + 30);
+        m_spinnerAngle = std::fmod(m_spinnerAngle + 30.0, 360.0);
         if (std::any_of(m_tabs.cbegin(), m_tabs.cend(), [](const TabInfo &t) { return t.loading; }))
             update();
         else
@@ -165,7 +166,7 @@ void TabStrip::paintEvent(QPaintEvent *)
 
         // audio indicator
         if (t.audible || t.muted) {
-            const QRect ar = audioRect(r);
+            QRect ar = audioRect(r);
             if (t.pinned) {
                 // pinned tabs show audio at bottom-right corner
                 ar.moveRight(r.right() - 4);

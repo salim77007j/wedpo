@@ -7,6 +7,8 @@
 #include <QStringList>
 #include <QMutex>
 
+class QTimer;
+
 struct wedpo_engine;
 
 class Privacy : public QObject
@@ -77,4 +79,5 @@ private:
     qint64 m_total = 0;
     qint64 m_today = 0;
     QString m_statsDay;
+    QTimer *m_saveTimer = nullptr;
 };

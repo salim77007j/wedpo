@@ -19,6 +19,7 @@
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QFileDialog>
+#include <QProgressBar>
 #include <QMessageBox>
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -185,14 +186,15 @@ SettingsPage::SettingsPage(QWidget *parent)
             b->setStyleSheet(QStringLiteral("QPushButton{background:%1;border:2px solid transparent;border-radius:13px;}"
                                             "QPushButton:checked{border-color:%2;}")
                                  .arg(colors[i], Theme::paletteColor("text").name()));
-            connect(b, &QPushButton::clicked, this, [i, colors, card]() {
+            connect(b, &QPushButton::clicked, this, [this, i, card]() {
                 Settings::instance()->setAccentIndex(i);
                 Theme::apply();
                 // uncheck siblings
                 const auto buttons = card->findChildren<QPushButton *>();
-                for (QPushButton *other : buttons)
+                const auto btns = card->findChildren<QPushButton *>();
+                for (QPushButton *other : btns)
                     if (other->isCheckable() && other->width() == 26)
-                        other->setChecked(other == sender());
+                        other->setChecked(other == this->sender());
             });
             alay->addWidget(b);
         }

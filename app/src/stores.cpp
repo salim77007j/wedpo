@@ -232,7 +232,7 @@ bool Stores::loadSession(QJsonArray *windows, bool *clean) const
     if (clean)
         *clean = false;
     if (windows)
-        windows->clear();
+        *windows = QJsonArray();
     QFile f(Settings::instance()->dataDir() + QStringLiteral("/session.json"));
     if (!f.open(QIODevice::ReadOnly))
         return false;

@@ -5,6 +5,7 @@
 #include "stores.h"
 
 #include <QWebEngineSettings>
+#include <QWebEngineCertificateError>
 #include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
 #include <QMessageBox>
@@ -23,27 +24,24 @@ static QString jsStringLiteral(const QString &s)
 {
     QString out;
     out.reserve(s.size() + 16);
-    out.append('"');
+    out.append("\");
     for (const QChar c : s) {
         switch (c.unicode()) {
-        case u'"':  out.append("\\\""); break;
-        case u'\':  out.append("\\\\"); break;
-        case u'
-': out.append("\n"); break;
-        case u'
-': out.append("\r"); break;
-        case u'	': out.append("\t"); break;
+        case 0x22:  out.append("\\""); break;
+        case 0x5C:  out.append("\\\\"); break;
+        case 0x0A: out.append("\n"); break;
+        case 0x0D: out.append("\r"); break;
+        case 0x09: out.append("\t"); break;
         default:
             if (c.unicode() < 0x20)
-                out.append(QStringLiteral("\u%1").arg(c.unicode(), 4, 16, QLatin1Char('0')));
+                out.append(QStringLiteral("\u%1").arg(c.unicode(), 4, 16, QLatin1Char(0)));
             else
                 out.append(c);
         }
     }
-    out.append('"');
+    out.append("\");
     return out;
 }
-
 WebPage::WebPage(QWebEngineProfile *profile, QObject *parent)
     : QWebEnginePage(profile, parent)
 {
@@ -103,7 +101,8 @@ void WebPage::onPermissionRequested(QWebEnginePermission request)
     const QString key = permissionKey(request.permissionType());
     int decision = Settings::instance()->permission(origin.toString(), key);
     if (decision == 0) {
-        QMessageBox box(this->view());
+        QWidget *dlgParent = qobject_cast<QWidget *>(parent());
+    QMessageBox box(dlgParent);
         box.setWindowTitle(tr("Permission request"));
         box.setIcon(QMessageBox::Question);
         box.setText(tr("Allow %1 to use %2?").arg(origin.host()).arg(key));
@@ -127,22 +126,20 @@ void WebPage::onPermissionRequested(QWebEnginePermission request)
 void WebPage::onCertificateError(const QWebEngineCertificateError &error)
 {
     QWebEngineCertificateError ce = error;   // the signal object is a copy we own
-    if (!ce.isOverridable())
-        return false;   // reject hard errors outright
-
     const QUrl url = ce.url();
     const QString host = url.host();
     // remembered override?
     if (Settings::instance()->value(QStringLiteral("certOverride/%1").arg(host), false).toBool()) {
         ce.acceptCertificate();
-        return true;
+        return;
     }
     if (!ce.isOverridable()) {
         ce.rejectCertificate();
         return;
     }
     ce.defer();
-    QMessageBox box(this->view());
+    QWidget *dlgParent = qobject_cast<QWidget *>(parent());
+    QMessageBox box(dlgParent);
     box.setWindowTitle(tr("Security warning"));
     box.setIcon(QMessageBox::Warning);
     box.setText(tr("The certificate for %1 could not be verified.").arg(host));

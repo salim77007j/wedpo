@@ -178,12 +178,14 @@ QPixmap Theme::icon(const QString &name, const QColor &color, int size)
     svg.replace(QStringLiteral("#CUR"), color.name());
 
     QSvgRenderer renderer(svg.toUtf8());
-    QPixmap pm(size * qApp->devicePixelRatioF(), size * qApp->devicePixelRatioF());
+    const qreal dpr = QGuiApplication::primaryScreen()
+                          ? QGuiApplication::primaryScreen()->devicePixelRatio() : 1.0;
+    QPixmap pm(int(size * dpr), int(size * dpr));
     pm.fill(Qt::transparent);
     QPainter painter(&pm);
     renderer.render(&painter, QRectF(0, 0, pm.width(), pm.height()));
     painter.end();
-    pm.setDevicePixelRatio(qApp->devicePixelRatioF());
+    pm.setDevicePixelRatio(dpr);
     s_cache.insert(key, pm);
     return pm;
 }

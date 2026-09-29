@@ -1,6 +1,7 @@
 // Wedpo browser — typed settings store over QSettings.
 #pragma once
 #include <QObject>
+#include <QVariant>
 #include <QHash>
 #include <QStringList>
 
